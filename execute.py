@@ -97,6 +97,7 @@ class Execute(Base):
         sent_console_truncated_message = False
 
         exit_code = self._check_for_ssh_agent()
+        print('exit_code from _check_for_ssh_agent {0}'.format(exit_code))
         if exit_code > 0:
             return exit_code
 
@@ -218,6 +219,10 @@ class Execute(Base):
     def _check_for_ssh_agent(self):
         self.log.debug('Inside _check_for_ssh_agent')
         devnull = open(os.devnull, 'wb')
-        p = subprocess.Popen('ssh-agent', shell=True, stdout=devnull)
+
+        # Unset LD_LIBRARY_PATH
+        env = dict(os.environ)
+        env.pop('LD_LIBRARY_PATH', None)
+        p = subprocess.Popen('ssh-agent', shell=True, stdout=devnull, env=env)
         p.communicate()
         return p.returncode
